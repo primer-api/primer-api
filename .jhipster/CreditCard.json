@@ -1,0 +1,32 @@
+{
+  "name": "CreditCard",
+  "fields": [
+    {
+      "fieldName": "number",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "expirationDate",
+      "fieldType": "String"
+    }
+  ],
+  "relationships": [
+    {
+      "relationshipType": "one-to-many",
+      "otherEntityName": "token",
+      "otherEntityRelationshipName": "creditCard",
+      "relationshipName": "token"
+    }
+  ],
+  "changelogDate": "20201215173536",
+  "entityTableName": "credit_card",
+  "dto": "no",
+  "pagination": "no",
+  "service": "no",
+  "jpaMetamodelFiltering": false,
+  "fluentMethods": true,
+  "readOnly": false,
+  "embedded": false,
+  "clientRootFolder": "",
+  "applications": ["dashboard", "tokeniser"]
+}
