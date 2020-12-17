@@ -27,6 +27,7 @@
   "fluentMethods": true,
   "readOnly": false,
   "embedded": false,
-  "clientRootFolder": "",
-  "applications": ["dashboard", "tokeniser"]
+  "clientRootFolder": "tokeniser",
+  "applications": ["tokeniser"],
+  "microserviceName": "tokeniser"
 }

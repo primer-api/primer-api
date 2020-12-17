@@ -3,7 +3,7 @@
     "authenticationType": "jwt",
     "cacheProvider": "hazelcast",
     "serverPort": "8081",
-    "serviceDiscoveryType": "eureka",
+    "serviceDiscoveryType": false,
     "skipUserManagement": true,
     "baseName": "tokeniser",
     "buildTool": "maven",
