@@ -22,12 +22,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
- * Integration tests for the {@link TokenResource} REST controller.
+ * Integration tests for the {@link ApiResource} REST controller.
  */
 @SpringBootTest(classes = TokeniserApp.class)
 @AutoConfigureMockMvc
 @WithMockUser
-public class TokenResourceIT {
+public class ApiResourceIT {
 
     private static final String DEFAULT_TOKEN = "AAAAAAAAAA";
     private static final String UPDATED_TOKEN = "BBBBBBBBBB";
@@ -121,7 +121,7 @@ public class TokenResourceIT {
             .andExpect(jsonPath("$.[*].id").value(hasItem(token.getId().intValue())))
             .andExpect(jsonPath("$.[*].token").value(hasItem(DEFAULT_TOKEN)));
     }
-    
+
     @Test
     @Transactional
     public void getToken() throws Exception {
