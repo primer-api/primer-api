@@ -1,5 +1,6 @@
 package com.primer.tokeniser.domain;
 
+import lombok.Builder;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -18,6 +19,14 @@ import java.util.Set;
 public class CreditCard implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    public CreditCard() {
+    }
+
+    public CreditCard(String number, String expirationDate) {
+        this.number = number;
+        this.expirationDate = expirationDate;
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

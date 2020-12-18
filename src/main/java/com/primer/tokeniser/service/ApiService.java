@@ -2,6 +2,7 @@ package com.primer.tokeniser.service;
 
 import com.primer.tokeniser.domain.CreditCard;
 import com.primer.tokeniser.domain.Token;
+import com.primer.tokeniser.repository.CreditCardRepository;
 import com.primer.tokeniser.repository.TokenRepository;
 import com.primer.tokeniser.web.rest.SaleDTO;
 import com.primer.tokeniser.web.rest.errors.BadRequestAlertException;
@@ -9,22 +10,33 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.ThreadLocalRandom;
+
+import static java.lang.String.valueOf;
+
 @Service
 public class ApiService {
 
+    private final CreditCardRepository creditCardRepository;
     private final Logger log = LoggerFactory.getLogger(ApiService.class);
-
     private final TokenRepository tokenRepository;
 
-    public ApiService(TokenRepository tokenRepository) {
+    public ApiService(
+        TokenRepository tokenRepository,
+        final CreditCardRepository creditCardRepository
+    ) {
         this.tokenRepository = tokenRepository;
+        this.creditCardRepository = creditCardRepository;
     }
 
-    public Token tokenise(final CreditCard creditCard) {
-        validateCreditCard(creditCard.getNumber());
-        validateCardExpiryDate(creditCard.getExpirationDate());
-
-        return null;
+    public Token tokenise(final CreditCard inputCreditCard) {
+        validateCreditCard(inputCreditCard.getNumber());
+        validateCardExpiryDate(inputCreditCard.getExpirationDate());
+        final CreditCard creditCard = creditCardRepository.save(inputCreditCard);
+        // TODO generate a more secure token
+        final String tokenised = valueOf(ThreadLocalRandom.current().nextLong(1_000_000_000_000_000L));
+        Token token = new Token(tokenised, creditCard);
+        return tokenRepository.save(token);
     }
 
     public Token sale(final SaleDTO sale) {

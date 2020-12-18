@@ -1,9 +1,11 @@
 package com.primer.tokeniser.web.rest;
 
 import com.primer.tokeniser.TokeniserApp;
+import com.primer.tokeniser.domain.CreditCard;
 import com.primer.tokeniser.domain.Token;
 import com.primer.tokeniser.repository.TokenRepository;
 
+import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,17 +77,19 @@ public class ApiResourceIT {
     @Transactional
     public void createToken() throws Exception {
         int databaseSizeBeforeCreate = tokenRepository.findAll().size();
+        final String number = "346979435224470";
+        val creditCard = new CreditCard(number, "12/20");
         // Create the Token
-        restTokenMockMvc.perform(post("/api/tokens")
+        restTokenMockMvc.perform(post("/api/tokenise")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(token)))
+            .content(TestUtil.convertObjectToJsonBytes(creditCard)))
             .andExpect(status().isCreated());
 
         // Validate the Token in the database
         List<Token> tokenList = tokenRepository.findAll();
         assertThat(tokenList).hasSize(databaseSizeBeforeCreate + 1);
         Token testToken = tokenList.get(tokenList.size() - 1);
-        assertThat(testToken.getToken()).isEqualTo(DEFAULT_TOKEN);
+        assertThat(testToken.getToken()).isNotEqualTo((number));
     }
 
     @Test

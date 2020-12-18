@@ -17,17 +17,40 @@ import java.io.Serializable;
 public class Token implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(name = "token")
-    private String token;
-
     @ManyToOne
     @JsonIgnoreProperties(value = "tokens", allowSetters = true)
     private CreditCard creditCard;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(name = "token")
+    private String token;
+
+    public Token(final String token, CreditCard creditCard) {
+        this.token = token;
+        this.creditCard = creditCard;
+    }
+
+    public Token() {
+    }
+
+    public Token token(String token) {
+        this.token = token;
+        return this;
+    }
+
+    public Token creditCard(CreditCard creditCard) {
+        this.creditCard = creditCard;
+        return this;
+    }
+
+    public CreditCard getCreditCard() {
+        return creditCard;
+    }
+
+    public void setCreditCard(CreditCard creditCard) {
+        this.creditCard = creditCard;
+    }
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
     public Long getId() {
@@ -42,26 +65,8 @@ public class Token implements Serializable {
         return token;
     }
 
-    public Token token(String token) {
-        this.token = token;
-        return this;
-    }
-
     public void setToken(String token) {
         this.token = token;
-    }
-
-    public CreditCard getCreditCard() {
-        return creditCard;
-    }
-
-    public Token creditCard(CreditCard creditCard) {
-        this.creditCard = creditCard;
-        return this;
-    }
-
-    public void setCreditCard(CreditCard creditCard) {
-        this.creditCard = creditCard;
     }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
 
