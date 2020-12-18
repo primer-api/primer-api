@@ -69,9 +69,6 @@ public class ApiResource {
     @PostMapping("/sale")
     public ResponseEntity<Token> sale(@RequestBody SaleDTO sale) throws URISyntaxException {
         log.debug("REST request to create a sale: {}", sale);
-//        if (token.getId() != null) {
-//            throw new BadRequestAlertException("A new token cannot already have an ID", ENTITY_NAME, "idexists");
-//        }
         Token result = apiService.sale(sale);
         return ResponseEntity.created(new URI("/api/sale/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
