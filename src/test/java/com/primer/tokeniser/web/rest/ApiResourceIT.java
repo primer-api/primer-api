@@ -3,6 +3,7 @@ package com.primer.tokeniser.web.rest;
 import com.primer.tokeniser.TokeniserApp;
 import com.primer.tokeniser.domain.CreditCard;
 import com.primer.tokeniser.domain.Token;
+import com.primer.tokeniser.repository.CreditCardRepository;
 import com.primer.tokeniser.repository.TokenRepository;
 
 import lombok.val;
@@ -36,6 +37,9 @@ public class ApiResourceIT {
 
     @Autowired
     private TokenRepository tokenRepository;
+
+    @Autowired
+    private CreditCardRepository creditCardRepository;
 
     @Autowired
     private EntityManager em;
@@ -75,10 +79,13 @@ public class ApiResourceIT {
 
     @Test
     @Transactional
-    public void createToken() throws Exception {
+    public void tokeniseSuccess() throws Exception {
         int databaseSizeBeforeCreate = tokenRepository.findAll().size();
+        int databaseSizeBeforeCreateCC = creditCardRepository.findAll().size();
         final String number = "346979435224470";
-        val creditCard = new CreditCard(number, "12/20");
+        final String expirationDate = "12/20";
+        val creditCard = new CreditCard(number, expirationDate);
+
         // Create the Token
         restTokenMockMvc.perform(post("/api/tokenise")
             .contentType(MediaType.APPLICATION_JSON)
@@ -87,9 +94,54 @@ public class ApiResourceIT {
 
         // Validate the Token in the database
         List<Token> tokenList = tokenRepository.findAll();
+        List<CreditCard> creditCardList = creditCardRepository.findAll();
         assertThat(tokenList).hasSize(databaseSizeBeforeCreate + 1);
+        assertThat(creditCardList).hasSize(databaseSizeBeforeCreateCC + 1);
+        CreditCard testCreditCard = creditCardList.get(creditCardList.size() - 1);
+        assertThat(testCreditCard.getNumber()).isEqualTo((number));
+        assertThat(testCreditCard.getExpirationDate()).isEqualTo((expirationDate));
         Token testToken = tokenList.get(tokenList.size() - 1);
         assertThat(testToken.getToken()).isNotEqualTo((number));
+    }
+
+    @Test
+    @Transactional
+    public void tokeniseWithInvalidNumber() throws Exception {
+        int databaseSizeBeforeCreate = tokenRepository.findAll().size();
+        int databaseSizeBeforeCreateCC = creditCardRepository.findAll().size();
+        final String number = "123123132132";
+        val creditCard = new CreditCard(number, "12/20");
+        // Create the Token
+        restTokenMockMvc.perform(post("/api/tokenise")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(creditCard)))
+            .andExpect(status().is4xxClientError());
+
+        // Validate the Token in the database
+        List<Token> tokenList = tokenRepository.findAll();
+        List<CreditCard> creditCardList = creditCardRepository.findAll();
+        assertThat(tokenList).hasSize(databaseSizeBeforeCreate);
+        assertThat(creditCardList).hasSize(databaseSizeBeforeCreateCC);
+    }
+
+    @Test
+    @Transactional
+    public void tokeniseWithInvalidExpirationDate() throws Exception {
+        int databaseSizeBeforeCreate = tokenRepository.findAll().size();
+        int databaseSizeBeforeCreateCC = creditCardRepository.findAll().size();
+        final String number = "123123132132";
+        val creditCard = new CreditCard(number, "14/20");
+        // Create the Token
+        restTokenMockMvc.perform(post("/api/tokenise")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(creditCard)))
+            .andExpect(status().is4xxClientError());
+
+        // Validate the Token in the database
+        List<Token> tokenList = tokenRepository.findAll();
+        List<CreditCard> creditCardList = creditCardRepository.findAll();
+        assertThat(tokenList).hasSize(databaseSizeBeforeCreate);
+        assertThat(creditCardList).hasSize(databaseSizeBeforeCreateCC);
     }
 
     @Test
