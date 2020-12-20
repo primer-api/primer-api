@@ -1,8 +1,7 @@
 package com.primer.tokeniser.repository;
 
 import com.primer.tokeniser.domain.Token;
-
-import org.springframework.data.jpa.repository.*;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -11,4 +10,6 @@ import org.springframework.stereotype.Repository;
 @SuppressWarnings("unused")
 @Repository
 public interface TokenRepository extends JpaRepository<Token, Long> {
+
+    Token findByToken(String token);
 }

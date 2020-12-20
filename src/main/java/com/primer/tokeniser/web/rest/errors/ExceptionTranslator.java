@@ -1,7 +1,6 @@
 package com.primer.tokeniser.web.rest.errors;
 
 import io.github.jhipster.web.util.HeaderUtil;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.http.ResponseEntity;
@@ -94,6 +93,16 @@ public class ExceptionTranslator implements ProblemHandling, SecurityAdviceTrait
     @ExceptionHandler
     public ResponseEntity<Problem> handleBadRequestAlertException(BadRequestAlertException ex, NativeWebRequest request) {
         return create(ex, request, HeaderUtil.createFailureAlert(applicationName, true, ex.getEntityName(), ex.getErrorKey(), ex.getMessage()));
+    }
+
+    @ExceptionHandler
+    public ResponseEntity handleIllegalArgumentExceptionException(IllegalArgumentException ex, NativeWebRequest request) {
+        return ResponseEntity.badRequest().build();
+    }
+
+    @ExceptionHandler
+    public ResponseEntity handleSaleFailedException(SaleFailedException ex, NativeWebRequest request) {
+        return ResponseEntity.ok(ex.getMessage());
     }
 
     @ExceptionHandler

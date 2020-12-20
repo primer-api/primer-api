@@ -5,7 +5,7 @@ import com.primer.tokeniser.domain.CreditCard;
 import com.primer.tokeniser.domain.Token;
 import com.primer.tokeniser.repository.CreditCardRepository;
 import com.primer.tokeniser.repository.TokenRepository;
-
+import com.primer.tokeniser.service.ApiService;
 import lombok.val;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -19,13 +19,15 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Integration tests for the {@link ApiResource} REST controller.
@@ -33,7 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = TokeniserApp.class)
 @AutoConfigureMockMvc
 @WithMockUser
-public class ApiResourceIT {
+class ApiResourceIT {
 
     @Autowired
     private TokenRepository tokenRepository;
@@ -42,27 +44,52 @@ public class ApiResourceIT {
     private CreditCardRepository creditCardRepository;
 
     @Autowired
+    private ApiService apiService;
+
+    @Autowired
     private MockMvc restTokenMockMvc;
 
-    private static Stream<Arguments> generateData() {
+    private static Stream<Arguments> generateValidCreditCard() {
         return Stream.of(
-            Arguments.of("346979435224470", "12/20"), // Amex
-            Arguments.of("30228809510150", "03/24"), // Diners Club
-            Arguments.of("6011904544257428", "01/14"), // Discover
-            Arguments.of("5335349966750735", "11/30"), // Mastercard
-            Arguments.of("4716859822546814", "10/22"), // Visa
-            Arguments.of("4485064840670", "11/30"), // Visa 13
-            Arguments.of("869926355806445", "11/30"), // Voyager
-            Arguments.of("210059417746122", "11/30"), // JCB 15
-            Arguments.of("3096342876197794", "11/30"), // JCB
-            Arguments.of("214978091287606", "11/30") // enRoute
+            Arguments.of("378282246310005", "12/20"), // Amex
+            Arguments.of("371449635398431", "12/20"), // Amex
+            Arguments.of("36259600000004", "03/24"), // Diners Club
+            Arguments.of("6011000991300009", "01/14"), // Discover
+            Arguments.of("3530111333300000", "11/30"), // JCB
+            Arguments.of("6304000000000000", "11/30"), // Maestro
+            Arguments.of("2223000048400011", "11/30"), // Mastercard
+            Arguments.of("5555555555554444", "11/30"), // Mastercard
+            Arguments.of("4500600000000061", "10/22"), // Visa
+            Arguments.of("4217651111111119", "10/22"), // Visa
+            Arguments.of("4012888888881881", "10/22"), // Visa
+            Arguments.of("4012000077777777", "10/22"), // Visa
+            Arguments.of("4012000033330026", "10/22"), // Visa
+            Arguments.of("4009348888881881", "10/22"), // Visa
+            Arguments.of("4005519200000004", "10/22"), // Visa
+            Arguments.of("4111111111111111", "10/22") // Visa
+        );
+    }
+
+    private static Stream<Arguments> generateBraintreeValidData() {
+        return Stream.of(
+            Arguments.of("6304000000000000", "11/30", BigDecimal.valueOf(55)), // Maestro
+            Arguments.of("2223000048400011", "11/30", BigDecimal.valueOf(100_000)), // Mastercard
+            Arguments.of("5555555555554444", "11/30", BigDecimal.valueOf(100_000)), // Mastercard
+            Arguments.of("4500600000000061", "10/22", BigDecimal.valueOf(10_000)), // Visa
+            Arguments.of("4217651111111119", "10/22", BigDecimal.valueOf(1_000_000)), // Visa
+            Arguments.of("4012888888881881", "10/22", BigDecimal.valueOf(1_000_000)), // Visa
+            Arguments.of("4012000077777777", "10/22", BigDecimal.valueOf(1_000_000)), // Visa
+            Arguments.of("4012000033330026", "10/22", BigDecimal.valueOf(1_000_000)), // Visa
+            Arguments.of("4009348888881881", "10/22", BigDecimal.valueOf(1_000_000)), // Visa
+            Arguments.of("4005519200000004", "10/22", BigDecimal.valueOf(1_000_000)), // Visa
+            Arguments.of("4111111111111111", "10/22", BigDecimal.valueOf(5002)) // Visa
         );
     }
 
     @ParameterizedTest
-    @MethodSource("generateData")
+    @MethodSource("generateValidCreditCard")
     @Transactional
-    public void tokeniseSuccess(final String number, final String expirationDate) throws Exception {
+    void tokeniseSuccess(final String number, final String expirationDate) throws Exception {
         int databaseSizeBeforeCreate = tokenRepository.findAll().size();
         int databaseSizeBeforeCreateCC = creditCardRepository.findAll().size();
         val creditCard = new CreditCard(number, expirationDate);
@@ -88,7 +115,7 @@ public class ApiResourceIT {
 
     @Test
     @Transactional
-    public void tokeniseWithInvalidNumber() throws Exception {
+    void tokeniseWithInvalidNumber() throws Exception {
         int databaseSizeBeforeCreate = tokenRepository.findAll().size();
         int databaseSizeBeforeCreateCC = creditCardRepository.findAll().size();
         final String number = "123123132132";
@@ -108,7 +135,7 @@ public class ApiResourceIT {
 
     @Test
     @Transactional
-    public void tokeniseWithInvalidExpirationDate() throws Exception {
+    void tokeniseWithInvalidExpirationDate() throws Exception {
         int databaseSizeBeforeCreate = tokenRepository.findAll().size();
         int databaseSizeBeforeCreateCC = creditCardRepository.findAll().size();
         final String number = "123123132132";
@@ -125,4 +152,50 @@ public class ApiResourceIT {
         assertThat(tokenList).hasSize(databaseSizeBeforeCreate);
         assertThat(creditCardList).hasSize(databaseSizeBeforeCreateCC);
     }
+
+    @ParameterizedTest
+    @MethodSource("generateBraintreeValidData")
+    @Transactional
+    void saleSuccess(final String number, final String expDate, final BigDecimal amount) throws Exception {
+        final Token token = apiService.tokenise(new CreditCard(number, expDate));
+        val sale = new SaleDTO(token.getToken(), amount);
+        // Create the Token
+        restTokenMockMvc.perform(post("/api/sale")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(sale)))
+            .andExpect(status().isOk())
+            .andExpect(content().string(containsString("Approved")));
+
+        // Validate the Token in the database
+        List<Token> tokenList = tokenRepository.findAll();
+        List<CreditCard> creditCardList = creditCardRepository.findAll();
+
+    }
+
+    // TODO test sale with not approved responses https://developers.braintreepayments.com/reference/general/testing/java
+
+    @Test
+    @Transactional
+    void saleWithTokenMissing() throws Exception {
+        val sale = new SaleDTO(null, BigDecimal.TEN);
+
+        // Create the Token
+        restTokenMockMvc.perform(post("/api/sale")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(sale)))
+            .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    @Transactional
+    void saleWithAmountMissing() throws Exception {
+        val sale = new SaleDTO("12213213213213", null);
+
+        // Create the Token
+        restTokenMockMvc.perform(post("/api/sale")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(sale)))
+            .andExpect(status().is4xxClientError());
+    }
+
 }

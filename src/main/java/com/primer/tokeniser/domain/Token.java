@@ -4,8 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
-import javax.persistence.*;
-
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import java.io.Serializable;
 
 /**
@@ -17,14 +22,17 @@ import java.io.Serializable;
 public class Token implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    @ManyToOne
-    @JsonIgnoreProperties(value = "tokens", allowSetters = true)
-    private CreditCard creditCard;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "token")
+
+    @Column(name = "token", unique = true)
     private String token;
+
+    @ManyToOne
+    @JsonIgnoreProperties(value = "tokens", allowSetters = true)
+    private CreditCard creditCard;
 
     public Token(final String token, CreditCard creditCard) {
         this.token = token;
@@ -32,24 +40,6 @@ public class Token implements Serializable {
     }
 
     public Token() {
-    }
-
-    public Token token(String token) {
-        this.token = token;
-        return this;
-    }
-
-    public Token creditCard(CreditCard creditCard) {
-        this.creditCard = creditCard;
-        return this;
-    }
-
-    public CreditCard getCreditCard() {
-        return creditCard;
-    }
-
-    public void setCreditCard(CreditCard creditCard) {
-        this.creditCard = creditCard;
     }
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
@@ -65,8 +55,26 @@ public class Token implements Serializable {
         return token;
     }
 
+    public Token token(String token) {
+        this.token = token;
+        return this;
+    }
+
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public CreditCard getCreditCard() {
+        return creditCard;
+    }
+
+    public Token creditCard(CreditCard creditCard) {
+        this.creditCard = creditCard;
+        return this;
+    }
+
+    public void setCreditCard(CreditCard creditCard) {
+        this.creditCard = creditCard;
     }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
 

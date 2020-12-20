@@ -2,25 +2,20 @@ package com.primer.tokeniser.web.rest;
 
 import com.primer.tokeniser.domain.CreditCard;
 import com.primer.tokeniser.domain.Token;
-import com.primer.tokeniser.repository.TokenRepository;
 import com.primer.tokeniser.service.ApiService;
-import com.primer.tokeniser.web.rest.errors.BadRequestAlertException;
-
 import io.github.jhipster.web.util.HeaderUtil;
-import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * API controller
@@ -67,11 +62,9 @@ public class ApiResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("/sale")
-    public ResponseEntity<Token> sale(@RequestBody SaleDTO sale) throws URISyntaxException {
+    public ResponseEntity<String> sale(@RequestBody SaleDTO sale) throws URISyntaxException {
         log.debug("REST request to create a sale: {}", sale);
-        Token result = apiService.sale(sale);
-        return ResponseEntity.created(new URI("/api/sale/" + result.getId()))
-            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
-            .body(result);
+        String result = apiService.sale(sale);
+        return ResponseEntity.ok(result);
     }
 }
