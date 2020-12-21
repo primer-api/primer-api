@@ -6,7 +6,6 @@ import com.primer.tokeniser.domain.Token;
 import com.primer.tokeniser.repository.CreditCardRepository;
 import com.primer.tokeniser.repository.TokenRepository;
 import com.primer.tokeniser.service.ApiService;
-import lombok.val;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -92,7 +91,7 @@ class ApiResourceIT {
     void tokeniseSuccess(final String number, final String expirationDate) throws Exception {
         int databaseSizeBeforeCreate = tokenRepository.findAll().size();
         int databaseSizeBeforeCreateCC = creditCardRepository.findAll().size();
-        val creditCard = new CreditCard(number, expirationDate);
+        CreditCard creditCard = new CreditCard(number, expirationDate);
 
         // Create the Token
         restTokenMockMvc.perform(post("/api/tokenise")
@@ -119,7 +118,7 @@ class ApiResourceIT {
         int databaseSizeBeforeCreate = tokenRepository.findAll().size();
         int databaseSizeBeforeCreateCC = creditCardRepository.findAll().size();
         final String number = "123123132132";
-        val creditCard = new CreditCard(number, "12/20");
+        CreditCard creditCard = new CreditCard(number, "12/20");
         // Create the Token
         restTokenMockMvc.perform(post("/api/tokenise")
             .contentType(MediaType.APPLICATION_JSON)
@@ -139,7 +138,7 @@ class ApiResourceIT {
         int databaseSizeBeforeCreate = tokenRepository.findAll().size();
         int databaseSizeBeforeCreateCC = creditCardRepository.findAll().size();
         final String number = "123123132132";
-        val creditCard = new CreditCard(number, "14/20");
+        CreditCard creditCard = new CreditCard(number, "14/20");
         // Create the Token
         restTokenMockMvc.perform(post("/api/tokenise")
             .contentType(MediaType.APPLICATION_JSON)
@@ -158,7 +157,7 @@ class ApiResourceIT {
     @Transactional
     void saleSuccess(final String number, final String expDate, final BigDecimal amount) throws Exception {
         final Token token = apiService.tokenise(new CreditCard(number, expDate));
-        val sale = new SaleDTO(token.getToken(), amount);
+        SaleDTO sale = new SaleDTO(token.getToken(), amount);
         // Create the Token
         restTokenMockMvc.perform(post("/api/sale")
             .contentType(MediaType.APPLICATION_JSON)
@@ -177,7 +176,7 @@ class ApiResourceIT {
     @Test
     @Transactional
     void saleWithTokenMissing() throws Exception {
-        val sale = new SaleDTO(null, BigDecimal.TEN);
+        SaleDTO sale = new SaleDTO(null, BigDecimal.TEN);
 
         // Create the Token
         restTokenMockMvc.perform(post("/api/sale")
@@ -189,7 +188,7 @@ class ApiResourceIT {
     @Test
     @Transactional
     void saleWithAmountMissing() throws Exception {
-        val sale = new SaleDTO("12213213213213", null);
+        SaleDTO sale = new SaleDTO("12213213213213", null);
 
         // Create the Token
         restTokenMockMvc.perform(post("/api/sale")

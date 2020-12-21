@@ -19,6 +19,13 @@ logging:
     io.github.jhipster: DEBUG
     com.primer.tokeniser: DEBUG
 
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    service-url:
+      defaultZone: http://admin:${jhipster.registry.password}@localhost:8761/eureka/
+
 spring:
   profiles:
     active: dev
@@ -52,6 +59,7 @@ spring:
   liquibase:
     # Remove 'faker' if you do not want the sample data to be loaded automatically
     contexts: dev, faker
+    drop-first: true
   mail:
     host: localhost
     port: 25
