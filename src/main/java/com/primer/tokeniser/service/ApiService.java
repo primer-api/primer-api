@@ -105,7 +105,7 @@ public class ApiService {
     private void validateCardExpiryDate(String expiryDate) {
         if (!expiryDate.matches("(?:0[1-9]|1[0-2])/[0-9]{2}")) {
             throw new BadRequestAlertException(
-                "Credit Card expiration date not valid",
+                "Credit Card expiration date not valid. Format MM/YY",
                 "CreditCard",
                 "expddatenotvalid"
             );
