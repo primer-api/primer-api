@@ -173,6 +173,8 @@ class ApiResourceIT {
     }
 
     // TODO test sale with not approved responses https://developers.braintreepayments.com/reference/general/testing/java
+    // TODO test sale with tokens not valid
+    // TODO test sale with tokens not found
 
     @Test
     @Transactional

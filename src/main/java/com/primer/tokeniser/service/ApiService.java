@@ -49,6 +49,7 @@ public class ApiService {
         String bound = creditCard.getNumber().replaceAll(".", "9");
         final String tokenised = valueOf(ThreadLocalRandom.current().nextLong(Long.parseLong(origin), Long.parseLong(bound)));
         Token token = new Token(tokenised, creditCard);
+        // TODO handle unique constraint exception
         return tokenRepository.save(token).getToken();
     }
 
