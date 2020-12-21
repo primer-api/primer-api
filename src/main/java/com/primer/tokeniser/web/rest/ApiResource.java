@@ -1,11 +1,9 @@
 package com.primer.tokeniser.web.rest;
 
 import com.primer.tokeniser.domain.CreditCard;
-import com.primer.tokeniser.domain.Token;
 import com.primer.tokeniser.dto.SaleDTO;
 import com.primer.tokeniser.service.ApiService;
 import com.primer.tokeniser.web.rest.errors.BadRequestAlertException;
-import io.github.jhipster.web.util.HeaderUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,13 +46,12 @@ public class ApiResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("/tokenise")
-    public ResponseEntity<Token> tokenise(@RequestBody CreditCard creditCard) throws URISyntaxException {
+    public ResponseEntity<String> tokenise(@RequestBody CreditCard creditCard) throws URISyntaxException {
         log.debug("REST request to create Token for creditCard: {}", creditCard);
         validateCreditCard(creditCard.getNumber());
         validateCardExpiryDate(creditCard.getExpirationDate());
-        Token result = apiService.tokenise(creditCard);
-        return ResponseEntity.created(new URI("/api/tokenise/" + result.getId()))
-            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
+        String result = apiService.tokenise(creditCard);
+        return ResponseEntity.created(new URI("/api/tokenise/"))
             .body(result);
     }
 

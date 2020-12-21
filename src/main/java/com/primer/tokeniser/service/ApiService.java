@@ -37,14 +37,19 @@ public class ApiService {
         this.braintreeGateway = braintreeGateway;
     }
 
-    public Token tokenise(final CreditCard inputCreditCard) {
+    /**
+     * Tokenise a credit card
+     * @param inputCreditCard number and expiration date
+     * @return token
+     */
+    public String tokenise(final CreditCard inputCreditCard) {
         final CreditCard creditCard = creditCardRepository.save(inputCreditCard);
         // TODO generate a more secure token
         String origin = "1" + creditCard.getNumber().substring(1).replaceAll(".", "0");
         String bound = creditCard.getNumber().replaceAll(".", "9");
         final String tokenised = valueOf(ThreadLocalRandom.current().nextLong(Long.parseLong(origin), Long.parseLong(bound)));
         Token token = new Token(tokenised, creditCard);
-        return tokenRepository.save(token);
+        return tokenRepository.save(token).getToken();
     }
 
     /**

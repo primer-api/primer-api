@@ -157,8 +157,8 @@ class ApiResourceIT {
     @MethodSource("generateBraintreeValidData")
     @Transactional
     void saleSuccess(final String number, final String expDate, final BigDecimal amount) throws Exception {
-        final Token token = apiService.tokenise(new CreditCard(number, expDate));
-        SaleDTO sale = new SaleDTO(token.getToken(), amount);
+        final String token = apiService.tokenise(new CreditCard(number, expDate));
+        SaleDTO sale = new SaleDTO(token, amount);
         // Create the Token
         restTokenMockMvc.perform(post("/api/sale")
             .contentType(MediaType.APPLICATION_JSON)
