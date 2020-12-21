@@ -1,4 +1,4 @@
-package com.primer.tokeniser.web.rest;
+package com.primer.tokeniser.dto;
 
 import java.math.BigDecimal;
 

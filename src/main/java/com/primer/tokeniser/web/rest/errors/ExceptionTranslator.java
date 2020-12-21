@@ -101,11 +101,6 @@ public class ExceptionTranslator implements ProblemHandling, SecurityAdviceTrait
     }
 
     @ExceptionHandler
-    public ResponseEntity handleSaleFailedException(SaleFailedException ex, NativeWebRequest request) {
-        return ResponseEntity.ok(ex.getMessage());
-    }
-
-    @ExceptionHandler
     public ResponseEntity<Problem> handleConcurrencyFailure(ConcurrencyFailureException ex, NativeWebRequest request) {
         Problem problem = Problem.builder()
             .withStatus(Status.CONFLICT)

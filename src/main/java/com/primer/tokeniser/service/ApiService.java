@@ -6,11 +6,9 @@ import com.braintreegateway.Transaction;
 import com.braintreegateway.TransactionRequest;
 import com.primer.tokeniser.domain.CreditCard;
 import com.primer.tokeniser.domain.Token;
+import com.primer.tokeniser.dto.SaleDTO;
 import com.primer.tokeniser.repository.CreditCardRepository;
 import com.primer.tokeniser.repository.TokenRepository;
-import com.primer.tokeniser.web.rest.SaleDTO;
-import com.primer.tokeniser.web.rest.errors.BadRequestAlertException;
-import com.primer.tokeniser.web.rest.errors.SaleFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -40,8 +38,6 @@ public class ApiService {
     }
 
     public Token tokenise(final CreditCard inputCreditCard) {
-        validateCreditCard(inputCreditCard.getNumber());
-        validateCardExpiryDate(inputCreditCard.getExpirationDate());
         final CreditCard creditCard = creditCardRepository.save(inputCreditCard);
         // TODO generate a more secure token
         String origin = "1" + creditCard.getNumber().substring(1).replaceAll(".", "0");
@@ -51,6 +47,11 @@ public class ApiService {
         return tokenRepository.save(token);
     }
 
+    /**
+     * Process a sale on the payment gateway
+     * @param sale token and amount
+     * @return Approved or error message
+     */
     public String sale(final SaleDTO sale) {
         Assert.notNull(sale, "Sale payload is missing");
         Assert.hasText(sale.getToken(), "Token is missing.");
@@ -77,38 +78,7 @@ public class ApiService {
             .getAllDeepValidationErrors()
             .forEach(validationError -> log.error(validationError.getMessage()));
 
-        throw new SaleFailedException(result.getMessage());
+        return result.getMessage();
     }
 
-    private void validateCreditCard(String input) {
-        String purportedCC = input.replaceAll(" ", "");
-        int sum = 0;
-
-        for (int i = 0; i < purportedCC.length(); i++) {
-            int cardNum = Integer.parseInt(Character.toString(purportedCC.charAt(i)));
-
-            if ((purportedCC.length() - i) % 2 == 0) {
-                cardNum = cardNum * 2;
-
-                if (cardNum > 9) {
-                    cardNum = cardNum - 9;
-                }
-            }
-
-            sum += cardNum;
-        }
-        if (sum % 10 != 0) {
-            throw new BadRequestAlertException("Credit Card number not valid", "CreditCard", "numbernotvalid");
-        }
-    }
-
-    private void validateCardExpiryDate(String expiryDate) {
-        if (!expiryDate.matches("(?:0[1-9]|1[0-2])/[0-9]{2}")) {
-            throw new BadRequestAlertException(
-                "Credit Card expiration date not valid. Format MM/YY",
-                "CreditCard",
-                "expddatenotvalid"
-            );
-        }
-    }
 }

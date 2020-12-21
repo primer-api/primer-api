@@ -3,6 +3,7 @@ package com.primer.tokeniser.web.rest;
 import com.primer.tokeniser.TokeniserApp;
 import com.primer.tokeniser.domain.CreditCard;
 import com.primer.tokeniser.domain.Token;
+import com.primer.tokeniser.dto.SaleDTO;
 import com.primer.tokeniser.repository.CreditCardRepository;
 import com.primer.tokeniser.repository.TokenRepository;
 import com.primer.tokeniser.service.ApiService;
