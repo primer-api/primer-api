@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import java.security.SecureRandom;
-import java.util.Base64;
 
 @Service
 public class ApiService {
@@ -23,9 +22,6 @@ public class ApiService {
 
     private final TokenRepository tokenRepository;
     private final BraintreeGateway braintreeGateway;
-
-    private static final SecureRandom random = new SecureRandom();
-    private static final Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
 
     public ApiService(
         TokenRepository tokenRepository,
