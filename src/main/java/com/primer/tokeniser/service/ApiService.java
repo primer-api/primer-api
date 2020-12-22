@@ -7,33 +7,31 @@ import com.braintreegateway.TransactionRequest;
 import com.primer.tokeniser.domain.CreditCard;
 import com.primer.tokeniser.domain.Token;
 import com.primer.tokeniser.dto.SaleDTO;
-import com.primer.tokeniser.repository.CreditCardRepository;
 import com.primer.tokeniser.repository.TokenRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import java.util.concurrent.ThreadLocalRandom;
-
-import static java.lang.String.valueOf;
+import java.security.SecureRandom;
+import java.util.Base64;
 
 @Service
 public class ApiService {
 
     private final Logger log = LoggerFactory.getLogger(ApiService.class);
 
-    private final CreditCardRepository creditCardRepository;
     private final TokenRepository tokenRepository;
     private final BraintreeGateway braintreeGateway;
 
+    private static final SecureRandom random = new SecureRandom();
+    private static final Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
+
     public ApiService(
         TokenRepository tokenRepository,
-        final CreditCardRepository creditCardRepository,
         final BraintreeGateway braintreeGateway
     ) {
         this.tokenRepository = tokenRepository;
-        this.creditCardRepository = creditCardRepository;
         this.braintreeGateway = braintreeGateway;
     }
 
@@ -43,14 +41,25 @@ public class ApiService {
      * @return token
      */
     public String tokenise(final CreditCard inputCreditCard) {
-        final CreditCard creditCard = creditCardRepository.save(inputCreditCard);
-        // TODO generate a more secure token
-        String origin = "1" + creditCard.getNumber().substring(1).replaceAll(".", "0");
-        String bound = creditCard.getNumber().replaceAll(".", "9");
-        final String tokenised = valueOf(ThreadLocalRandom.current().nextLong(Long.parseLong(origin), Long.parseLong(bound)));
-        Token token = new Token(tokenised, creditCard);
-        // TODO handle unique constraint exception
-        return tokenRepository.save(token).getToken();
+        final String tokenised = generateToken(inputCreditCard.getNumber());
+        Token token = new Token(tokenised, inputCreditCard);
+        final Token newToken = tokenRepository.save(token);
+        return newToken.getToken();
+    }
+
+    /**
+     * Generate a secure random token with the same length as the PAN (credit card number)
+     *
+     * @param pan credit card number
+     * @return secure random token
+     */
+    protected String generateToken(final String pan) {
+        SecureRandom randomGenerator = new SecureRandom();
+        String token = String.valueOf(randomGenerator.nextLong());
+        if (token.length() < pan.length()) {
+            return generateToken(pan);
+        }
+        return token.substring(token.length() - pan.length());
     }
 
     /**
