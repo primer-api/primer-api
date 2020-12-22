@@ -1,0 +1,25 @@
+application {
+  config {
+    baseName tokeniser,
+    applicationType  microservice,
+    packageName com.primer.tokeniser,
+    authenticationType jwt,
+    prodDatabaseType mysql,
+    serviceDiscoveryType no
+  }
+  entities Token, CreditCard
+}
+
+entity Token {
+	token String
+}
+
+entity CreditCard {
+	number String
+    expirationDate String
+}
+
+relationship OneToMany {
+  CreditCard to Token
+}
+    
